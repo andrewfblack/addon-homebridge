@@ -1,11 +1,10 @@
-ARG BUILD_FROM=hassioaddons/base:2.1.2
-# hadolint ignore=DL3006
-FROM ${BUILD_FROM}
+ARG S6_ARCH
+FROM oznu/s6-node:14.18.0-${S6_ARCH:-amd64}
 
-# Setup base
 RUN apk add --no-cache git python2 python3 make g++ avahi-compat-libdns_sd avahi-dev dbus \
     iputils sudo nano \
   && chmod 4755 /bin/ping \
+  && mkdir /homebridge \
   && npm set global-style=true \
   && npm set audit=false \ 
   && npm set fund=false
@@ -28,25 +27,10 @@ RUN npm install -g --unsafe-perm homebridge@${HOMEBRIDGE_VERSION}
 ENV CONFIG_UI_VERSION=4.41.2 HOMEBRIDGE_CONFIG_UI=1 HOMEBRIDGE_CONFIG_UI_PORT=8581
 RUN npm install -g --unsafe-perm homebridge-config-ui-x@${CONFIG_UI_VERSION}
 
+WORKDIR /homebridge
+VOLUME /homebridge
+
 COPY root /
 
 ARG AVAHI
 ENV ENABLE_AVAHI="${AVAHI:-0}"
-
-# Labels
-LABEL \
-    io.hass.name="Homebridge" \
-    io.hass.description="Homebridge Addon" \
-    io.hass.arch="${BUILD_ARCH}" \
-    io.hass.type="addon" \
-    io.hass.version=${BUILD_VERSION} \
-    maintainer="Andrew Black <andrewfblack@addons.community>" \
-    org.label-schema.description="Homebridge Addon" \
-    org.label-schema.build-date=${BUILD_DATE} \
-    org.label-schema.name="Homebridge" \
-    org.label-schema.schema-version="1.0" \
-    org.label-schema.url="https://community.home-assistant.io/t/community-hass-io-add-on-homebridge/33803?u=frenck" \
-    org.label-schema.usage="https://github.com/hassio-addons/addon-homebridge/tree/master/README.md" \
-    org.label-schema.vcs-ref=${BUILD_REF} \
-    org.label-schema.vcs-url="https://github.com/andrewfblack/addon-homebridge" \
-    org.label-schema.vendor="Community Hass.io Add-ons"
