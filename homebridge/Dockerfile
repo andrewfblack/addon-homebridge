@@ -26,7 +26,7 @@ RUN \
     && npm set unsafe-perm true \
     \
     && npm -g install \
-        node-gyp@3.8.0 \
+        node-gyp \
         homebridge \
         homebridge-config-ui-x \
     \
